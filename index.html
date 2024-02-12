@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Map Design</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.8.1/mapbox-gl.css" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .map-popup {
+            max-width: 200px;
+            text-align: center;
+        }
+
+        .map-popup.bottom-left {
+            bottom: 10px;
+            left: 10px;
+        }
+
+        /* each line for a break */
+        .break {
+            position: relative;
+            margin: 0px;
+            padding: 0px;
+        }
+
+        /* basic style for a dot/circle */
+        .dot {
+            display: inline-block;
+            margin-top: 5px;
+            border-radius: 50%;
+            opacity: 0.6;
+        }
+
+        /* the label for the dot */
+        .dot-label {
+            position: absolute;
+            top: 0;
+            right: 0;
+            font-style: italic;
+        }
+
+        /* the style of the layer control menu */
+        #menu {
+            background: #fff;
+            position: absolute;
+            z-index: 1;
+            top: 10px;
+            right: 10px;
+            border-radius: 3px;
+            width: 120px;
+            border: 1px solid rgba(0, 0, 0, 0.4);
+            font-family: 'Open Sans', sans-serif;
+        }
+
+        /* each layer on the menu */
+        #menu a {
+            font-size: 13px;
+            color: #404040;
+            display: block;
+            margin: 0;
+            padding: 0;
+            padding: 10px;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+            text-align: center;
+        }
+
+        /* the last item of the layer items will not include a seperator */
+        #menu a:last-child {
+            border: none;
+        }
+
+        /* change color and background color while a pointer is on an hybrid link. */
+        #menu a:hover {
+            background-color: #f8f8f8;
+            color: #404040;
+        }
+
+        #menu a.active {
+            background-color: #3887be;
+            color: #ffffff;
+        }
+
+        #menu a.active:hover {
+            background: #3074a4;
+        }
+    </style>
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.8.1/mapbox-gl.js"></script>
+</head>
+
+<body>
+    <nav id="menu"></nav>
+    <div id='map'></div>
+    <script type="text/javascript">
+        mapboxgl.accessToken =
+            'pk.eyJ1IjoiamFrb2J6aGFvIiwiYSI6ImNpcms2YWsyMzAwMmtmbG5icTFxZ3ZkdncifQ.P9MBej1xacybKcDN_jehvw';
+        let map = new mapboxgl.Map({
+            container: 'map', // container ID
+            style: 'mapbox://styles/mapbox/dark-v10',
+            zoom: 12, // starting zoom
+            center: [-122.2559435, 47.6002614] // starting center
+        });
+
+        map.on('load', () => { //simplifying the function statement: arrow with brackets to define a function
+
+            map.addSource('monoTile', {
+                'type': 'raster',
+                'tiles': [
+                    'assets/mono/{z}/{x}/{y}.png'
+                ],
+                'tileSize': 256,
+                'attribution': 'Map tiles designed by Reginald Asplet</a>'
+            });
+
+           
+
+            map.addSource('theme', {
+                'type': 'raster',
+                'tiles': [
+                    'assets/cityPoints/{z}/{x}/{y}.png'
+                ],
+                'tileSize': 256,
+                'attribution': 'Map tiles designed by Reginald Asplet'
+            });
+
+            map.addSource('3Dmap', {
+                'type': 'raster',
+                'tiles': [
+                    'assets/cityPoints_basic/{z}/{x}/{y}.png'
+                ],
+                'tileSize': 256,
+                'attribution': 'Map tiles designed by Reginald Asplet'
+            });
+
+            map.addSource('UW', {
+                'type': 'raster',
+                'tiles': [
+                    'assets/UW/{z}/{x}/{y}.png'
+                ],
+                'tileSize': 256,
+                'attribution': 'Map tiles designed by Reginald Asplet'
+            });
+
+            
+            
+            
+            map.addLayer({
+                'id': 'monochrome',
+                'type': 'raster',
+                'layout': {
+                    'visibility': 'none'
+                },
+                'source': 'monoTile'
+            });
+
+            
+            map.addLayer({
+                'id': 'cityPoints',
+                'type': 'raster',
+                'layout': {
+                    'visibility': 'none'
+                },
+                'source': 'theme'
+            });
+
+            map.addLayer({
+                'id': 'Monochrome and CityPoints',
+                'type': 'raster',
+                'layout': {
+                    'visibility': 'none'
+                },
+                'source': '3Dmap'
+            });
+
+            map.addLayer({
+                'id': 'UW',
+                'type': 'raster',
+                'layout': {
+                    'visibility': 'none'
+                },
+                'source': 'UW'
+            });
+
+            // Add zoom control
+        map.addControl(new mapboxgl.NavigationControl(), 'top-left');
+
+            // Add description box
+        const popup = new mapboxgl.Popup({
+            closeButton: false,
+            closeOnClick: false
+            });
+
+        map.on('mouseenter', 'monochrome', (e) => {
+            const description = 'This is the monochrome layer.';
+            popup.setLngLat(e.lngLat).setHTML(description).addTo(map);
+            popup._container.classList.add('bottom-left'); // Add the bottom-left class to the popup container
+            });
+
+        map.on('mouseleave', 'monochrome', () => {
+            popup.remove();
+            });
+
+        map.on('load', () => {
+            // Your existing code for adding sources and layers
+            });
+
+        map.on('idle', () => {
+            // Your existing code for layer toggle buttons
+            });
+
+        });
+
+
+        // After the last frame rendered before the map enters an "idle" state.
+        map.on('idle', () => {
+            // If these two layers were not added to the map, abort
+            if (!map.getLayer('monochrome') || !map.getLayer('cityPoints') || !map.getLayer('Monochrome and CityPoints') || !map.getLayer('UW')) {
+                return;
+            }
+
+            // Enumerate ids of the layers.
+            const toggleableLayerIds = ['monochrome', 'cityPoints', 'Monochrome and CityPoints', 'UW'];
+
+            // Set up the corresponding toggle button for each layer.
+            for (const id of toggleableLayerIds) {
+                // Skip layers that already have a button set up.
+                if (document.getElementById(id)) {
+                    continue;
+                }
+
+                // Create a link.
+                const link = document.createElement('a');
+                link.id = id;
+                link.href = '#';
+                link.textContent = id;
+                link.className = 'inactive';
+
+                // Show or hide layer when the toggle is clicked.
+                link.onclick = function (e) {
+                    const clickedLayer = this.textContent;
+                    // preventDefault() tells the user agent that if the event does not get explicitly handled, 
+                    // its default action should not be taken as it normally would be.
+                    e.preventDefault();
+                    // The stopPropagation() method prevents further propagation of the current event in the capturing 
+                    // and bubbling phases. It does not, however, prevent any default behaviors from occurring; 
+                    // for instance, clicks on links are still processed. If you want to stop those behaviors, 
+                    // see the preventDefault() method.
+                    e.stopPropagation();
+
+                    const visibility = map.getLayoutProperty(
+                        clickedLayer,
+                        'visibility'
+                    );
+
+                    // Toggle layer visibility by changing the layout object's visibility property.
+                    // if it is currently visible, after the clicking, it will be turned off.
+                    if (visibility === 'visible') {
+                        map.setLayoutProperty(clickedLayer, 'visibility', 'none');
+                        this.className = '';
+                    } else { //otherise, it will be turned on.
+                        this.className = 'active';
+                        map.setLayoutProperty(
+                            clickedLayer,
+                            'visibility',
+                            'visible'
+                        );
+                    }
+                };
+
+                // in the menu place holder, insert the layer links.
+                const layers = document.getElementById('menu');
+                layers.appendChild(link);
+            }
+        });
+    </script>
+</body>
+
+</html>
